@@ -11,7 +11,7 @@ import tempfile
 
 ROOT=Path(__file__).resolve().parent.parent
 sys.path.insert(0,str(ROOT/'scripts'))
-from build_macos import VERSION,NAME,ARCHITECTURES,native_architecture,file_hash
+from build_macos import VERSION,NAME,ARCHITECTURES,native_architecture,file_hash,copy_licenses
 
 
 def main():
@@ -30,6 +30,7 @@ def main():
         (staging/'Applications').symlink_to('/Applications',target_is_directory=True)
         (staging/'使用说明.txt').write_text('将“招聘雷达.app”拖到 Applications 文件夹，再从“应用程序”打开。\n无需安装 Python 或采集浏览器，不填 Key 也可使用。\n首次使用有教程；AI 与微信提醒均可跳过。\n本应用尚未完成 Apple 开发者公证，首次打开请按系统提示确认来源。\n',encoding='utf-8')
         shutil.copyfile(ROOT/'LICENSE',staging/'LICENSE.txt')
+        copy_licenses(staging)
         subprocess.run(['/usr/bin/hdiutil','create','-ov','-format','UDZO','-fs','HFS+',
                         '-volname',NAME,'-srcfolder',str(staging),str(output)],check=True)
         mount=root/'mounted';mount.mkdir()
