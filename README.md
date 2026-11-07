@@ -10,6 +10,10 @@
 [![Windows / macOS](https://img.shields.io/badge/Windows%20%2F%20macOS-supported-244e42)](#开始使用)
 [![测试](https://github.com/SongLin99/HireWatch/actions/workflows/ci.yml/badge.svg)](https://github.com/SongLin99/HireWatch/actions/workflows/ci.yml)
 
+**[下载 Windows / Mac 桌面应用](https://github.com/SongLin99/HireWatch/releases/latest)** · **[三步上手](docs/快速上手.md)** · **[宣传图片](docs/images)**
+
+桌面应用 ZIP 自带运行环境；下面的“开始使用”介绍源码方式，首次需要安装 Python。
+
 **不填写任何 Key 也能使用：采集岗位、关键词搜索、官网字段筛选、收藏和查看详情都不依赖付费模型。** AI 整理出的岗位类型、技能等高级字段需要先完成解析；微信推送另需自己的推送服务凭据。
 
 ## 能做什么
