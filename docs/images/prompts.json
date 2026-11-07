@@ -1,0 +1,17 @@
+{
+  "tool": "built-in imagegen",
+  "assets": [
+    {
+      "file": "cover.png",
+      "prompt": "Use case: ads-marketing. Create a polished wide landscape Chinese open-source software promotional cover for 招聘雷达 HireWatch, a local-first internship job monitor for Windows and macOS. Brand matches a quiet editorial dashboard: warm off-white paper, dark forest green #172b2a, soft lime #d8efab, elegant precise Chinese sans-serif typography, generous whitespace, very premium restrained design. Main graphic is a sophisticated 3D radar circle with a few floating blank job cards and a tiny star bookmark, soft studio shadows. The graphic is conceptual, not a screenshot. Exact prominent text: \"招聘雷达\". Smaller English: \"HireWatch\". Exact headline: \"把实习机会，放进自己的工作台。\". Three small feature labels: \"官方招聘来源\" \"多条件筛选\" \"本地运行\". Footer: \"Windows / macOS · MIT 开源\" and discreet \"功能示意\". Do not include employer logos, fake job counts, promises of coverage, keys, personal data, URLs or QR codes. Crisp legible Chinese, professional developer-product launch graphic."
+    },
+    {
+      "file": "optional-ai.png",
+      "prompt": "Use case: ads-marketing. Create a square Chinese promotional graphic for 招聘雷达 HireWatch, same quiet premium brand in warm off-white, dark forest green #172b2a, soft lime #d8efab, generous space and crisp Chinese sans-serif. Theme: AI optional, user chooses own provider. Headline exactly \"先找实习，再按需连接 AI。\" Product name \"招聘雷达 / HireWatch\". A tasteful 3D toggle and three small floating abstract job cards lead into a restrained sparkle symbol; conceptual illustration, no fake scores, no screenshot. Two clearly separated text panels: \"不填 Key\" with \"采集 · 搜索 · 收藏\"; \"填写自己的 Key\" with \"AI 解析 · 偏好匹配\". Footer exact \"支持 DeepSeek / OpenRouter\" and \"AI 调用由所选服务商计费\". Small caption \"功能示意\". No keys, user data, employer logos, URLs, QR codes, free-AI claims or guaranteed jobs."
+    },
+    {
+      "file": "get-started.png",
+      "prompt": "Use case: ads-marketing. Create a portrait 4:5 promotional onboarding poster for 招聘雷达 HireWatch, a local-first open-source internship monitor. Match quiet editorial warm white, forest green #172b2a, lime #d8efab, beautiful Chinese sans-serif and precise typography. Title exactly \"你的实习信息工作台。\" product label \"招聘雷达 / HireWatch\". Three spacious vertically stacked steps with elegant 3D minimal icons radar / filter / bookmark: \"01  检查官方岗位\" \"02  按条件筛选\" \"03  收藏并跟进\". Short footer sentences: \"Windows / macOS\" \"首次使用自带教程\" \"AI 与微信提醒均为可选功能\". Tiny caption \"功能示意\". Make this a polished launch poster, uncluttered with strong hierarchy and ample margins. No fake user/job counts, no guarantee of real-time updates, no employer logos, no API credentials, no URLs or QR codes."
+    }
+  ]
+}

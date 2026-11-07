@@ -1,0 +1,4 @@
+# Build natively on macOS 14+ using a matching arm64 or x86_64 Python 3.10+.
+# pystray installs its Cocoa/Quartz PyObjC dependencies on macOS automatically.
+-r requirements-build.txt
+-r requirements-dev.txt

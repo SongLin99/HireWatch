@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>招聘雷达 · 大厂实习监控</title><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/style.css"><link rel="stylesheet" href="/assets/upgrade.css"><link rel="stylesheet" href="/assets/readability.css"><link rel="stylesheet" href="/assets/typography.css"><script src="/assets/app.js" defer></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <a class="brand" href="/"><span class="brand-icon">◉</span><span>招聘雷达<small>HIREWATCH / INTERNSHIPS</small></span></a>
+    <div class="nav-label">你的求职工作台</div>
+    <nav aria-label="主导航">
+      <button class="nav active" data-view="jobs"><span>▦</span>岗位看板</button>
+      <button class="nav" data-view="match"><span>✦</span>AI 岗位匹配 <i class="nav-new">NEW</i></button>
+      <button class="nav" data-view="sources"><span>◎</span>监控来源</button>
+      <button class="nav" data-view="settings"><span>⚙</span>设置与推送</button>
+    </nav>
+    <nav class="saved-nav-section" aria-label="收藏导航">
+      <button class="nav" data-view="saved" aria-label="已收藏岗位" title="已收藏岗位 · 看板与 AI 匹配共用"><span>★</span>已收藏岗位 <b id="saved-nav">0</b></button>
+    </nav>
+    <div class="sidebar-bottom"><button id="open-tutorial" class="tutorial-help" type="button">? 使用教程</button><span class="signal"></span> 本地数据 · 官方来源<p>让机会主动找到你。</p><small>电脑与程序运行时持续监控</small></div>
+  </aside>
+  <main>
+    <header class="topbar"><span id="breadcrumb">工作台 / 岗位看板</span><div class="top-right"><span id="live-status" class="live">等待首次检查</span><span class="avatar">我</span></div></header>
+    <div class="content">
+      <div class="heading"><div><p class="eyebrow">YOUR NEXT CHAPTER / AI & TECH INTERNSHIPS</p><h1 id="page-title">更早发现，更适合你的机会。</h1><p id="page-subtitle">连接大厂与 AI 实验室的官方实习岗位，让下一步更清晰。</p></div><button id="scan" class="primary">↻ 检查最新岗位</button></div>
+      <section class="stats" aria-label="监控概况">
+        <div class="stat"><span>已收录岗位</span><strong id="stat-total">—</strong><small>持续保留收录历史</small></div>
+        <div class="stat"><span>最近仍在列表</span><strong id="stat-active">—</strong><small>是否在招请以官网为准</small></div>
+        <div class="stat"><span>已收藏机会</span><strong id="stat-saved">—</strong><small>把感兴趣的岗位留下来</small></div>
+        <div class="stat accent"><span>待推送动态</span><strong id="stat-pending">—</strong><small id="push-caption">微信推送尚未启用</small></div>
+      </section>
+
+      <section id="jobs-view">
+        <div class="match-banner"><div class="banner-orbit" aria-hidden="true">✦</div><div><span class="small-kicker">YOUR MODEL / YOUR NEXT OPPORTUNITY</span><h2>别只搜索岗位，让岗位匹配你。</h2><p>写下你的技能、城市和实习时间，获得有理由的推荐。</p></div><button id="open-match" class="banner-button">告诉 AI 我的偏好 <span>↗</span></button></div>
+        <div class="ai-progress-strip"><div><span class="spark">✦</span><strong id="ai-progress-text">正在读取 AI 解析进度</strong><span id="ai-model-caption">从官网原文提取技能与方向</span></div><progress id="ai-progress" max="100" value="0" aria-label="AI解析进度"></progress><span id="ai-progress-count">—</span></div>
+        <div class="section-title"><h2 id="list-title">发现机会</h2><a id="export" href="/api/export">导出 CSV ↗</a></div>
+        <div class="filter-panel">
+          <div class="search-row"><label class="search"><span>⌕</span><input id="search" type="search" placeholder="搜索岗位、技能、团队，如 Python、大模型、产品" aria-label="搜索岗位"></label><label class="city-filter"><span>城市</span><input id="city" placeholder="不限城市" aria-label="按城市筛选"></label></div>
+          <div class="filter-row"><div id="company-chips" class="chips"></div><div class="extra-filters"><select id="kind" aria-label="实习类型"><option value="">全部实习类型</option><option>日常</option><option>暑期</option><option>研究</option><option>ByteIntern</option><option>应届实习</option><option>转正</option><option value="兼招全职">实习 / 全职兼招</option></select><select id="job-status" aria-label="岗位采集状态"><option value="active">最近仍在列表</option><option value="">全部收录记录</option><option value="unseen">最近未见</option></select></div></div>
+          <details class="advanced-filters"><summary>更多筛选 <span id="filter-count"></span><span class="summary-arrow">⌄</span></summary><div class="advanced-grid">
+            <label class="field">岗位方向<select id="role-type"><option value="">不限方向</option></select></label>
+            <label class="field">学历要求<select id="degree"><option value="">不限学历</option><option>本科</option><option>硕士</option><option>博士</option><option>专科</option><option>不限</option><option>未说明</option></select></label>
+            <label class="field">标签 / 技能<select id="tag-filter"><option value="">不限标签</option></select></label>
+            <label class="field">部门 / 团队<input id="department" placeholder="例如 Seed、ACG、Agent"></label>
+            <label class="field">每周可到岗<select id="available-days"><option value="0">不限天数</option><option value="3">最多 3 天</option><option value="4">最多 4 天</option><option value="5">最多 5 天</option></select></label>
+            <label class="field">可持续实习<select id="available-months"><option value="0">不限时长</option><option value="3">3 个月</option><option value="4">4 个月</option><option value="6">6 个月</option></select></label>
+            <label class="field">首次发现时间<select id="recent"><option value="0">不限时间</option><option value="3">最近 3 天</option><option value="7">最近 7 天</option><option value="14">最近 14 天</option><option value="30">最近 30 天</option></select></label>
+            <label class="field">解析状态<select id="ai-filter"><option value="">全部状态</option><option value="complete">AI 已解析</option><option value="pending">等待解析</option><option value="failed">解析待重试</option></select></label>
+          </div><p class="hint">天数和时长只排除明确超过你可到岗条件的岗位；官网未说明的仍会保留。</p></details>
+          <div class="filter-foot"><label class="check"><input id="matching" type="checkbox">只看符合订阅规则的岗位</label><button id="apply-subscription" class="text-button" type="button">把当前岗位条件设为订阅 ↗</button><span>多个搜索词以空格分隔，需同时匹配</span></div>
+        </div>
+        <div class="results-meta"><span id="result-count">正在读取数据…</span><div class="results-actions"><select id="sort" aria-label="排序"><option value="changed">按最近变动</option><option value="first_seen">按首次发现</option><option value="published">按官网发布</option><option value="company">按公司排列</option></select><div class="view-switch" aria-label="显示方式"><button data-layout="table" class="selected" aria-label="列表显示">☷</button><button data-layout="cards" aria-label="卡片显示">▦</button></div></div></div>
+        <div class="jobs-table"><div class="table-head"><span>岗位与团队</span><span>工作城市</span><span>实习类型</span><span>最近变动</span><span></span></div><div id="job-list"></div></div>
+        <div id="empty" class="empty" hidden><span class="empty-symbol">◎</span><h3>还没有符合条件的岗位</h3><p id="empty-text">首次采集完成后，官方岗位会出现在这里。</p><button id="reset-filters" class="secondary">清除筛选条件</button></div>
+        <div class="pagination"><span id="page-info"></span><div><button id="prev" class="secondary">← 上一页</button><button id="next" class="secondary">下一页 →</button></div></div>
+      </section>
+
+      <section id="match-view" hidden>
+        <div class="match-workspace"><aside class="prompt-panel"><div class="panel-heading"><span class="ai-icon">✦</span><div><h2>描述你的理想实习</h2><p>方向越具体，比较越有依据。</p></div></div><form id="match-form"><label class="field" for="match-prompt">我的经历与偏好</label><textarea id="match-prompt" rows="9" maxlength="6000" minlength="5" required placeholder="例如：我有 Python、PyTorch 项目经验，想在北京或上海做大模型、Agent 或推理优化实习。每周能到岗 4 天，持续 4 个月。优先能参与研发的团队，不考虑销售。"></textarea><div class="prompt-examples"><span>试试这些方向</span><button type="button" data-example="llm">大模型 / Agent</button><button type="button" data-example="research">研究实习</button><button type="button" data-example="game">AI + 游戏</button></div><label class="field">比较候选数<select id="match-candidates"><option value="40">40 个 · 更快</option><option value="80" selected>80 个 · 均衡</option><option value="160">160 个 · 更广</option></select></label><label class="check match-scope"><input id="match-use-filters" type="checkbox">沿用看板的公司与城市筛选</label><button id="run-match" class="primary match-submit" type="submit">✦ 帮我匹配实习岗位</button><p class="hint">从实习岗位库检索候选，再逐项比较。模型不会把你没提到的技能当成已有能力。每次匹配会调用设置中选择的 AI 服务和模型，并计入每日预算。</p></form><div class="match-history"><h3>最近的匹配</h3><div id="match-history"></div></div></aside>
+        <div class="match-results-panel"><div class="match-result-heading"><div><p class="eyebrow">A BETTER FIT, WITH REASONS</p><h2>为你比较的机会</h2></div><select id="minimum-score" aria-label="匹配分筛选"><option value="0">全部匹配分</option><option value="60">60 分及以上</option><option value="75">75 分及以上</option><option value="85">85 分及以上</option></select></div><div id="match-progress" class="match-progress" hidden><span class="spinner"></span><div><strong id="match-progress-text">正在理解偏好</strong><p>你可以离开此页，匹配结果会保留。</p></div></div><div id="match-summary" class="match-summary" hidden></div><div id="match-results"></div><div id="match-empty" class="match-empty"><span>✦</span><h3>下一份实习，先从你的偏好开始。</h3><p>输入技能、方向、城市与可到岗时间。<br>我们会把匹配点和需要确认的条件一起列给你。</p><div class="match-empty-tags"><span>方向与技能</span><span>城市与到岗</span><span>匹配理由</span></div></div></div></div>
+      </section>
+
+      <section id="sources-view" hidden><div class="section-title"><h2>直接连接官方招聘渠道</h2><span>每次检查独立记录结果</span></div><div id="source-grid" class="source-grid"></div><div class="note">“最近未见”表示连续两次完整采集没有发现该岗位，不代表招聘已关闭。来源失败时保留上一轮数据。</div></section>
+
+      <section id="settings-view" hidden>
+        <form id="settings-form" class="settings-grid">
+          <section class="panel full monitor-panel"><div class="panel-heading"><span class="step">01</span><div><h2>监控范围</h2><p>选择公司与检查频率。</p></div></div><div id="enabled-sources" class="checkbox-grid"></div><label class="field interval-field">检查间隔（分钟）<input id="interval" type="number" min="5" max="1440" required></label><p class="hint">发现岗位后按推送频率发送。首次采集建立基线，不推送已有岗位。</p></section>
+          <section class="panel full subscription-panel"><div class="panel-heading"><span class="step">02</span><div><h2>我的订阅规则</h2><p>按方向与实际到岗条件，筛出值得关注的实习机会。</p></div></div>
+            <div class="subscription-fields">
+              <label class="field">关注关键词<input id="rule-keywords" placeholder="例如：Python, 后端, 大模型"></label>
+              <label class="field">关键词匹配方式<select id="rule-mode"><option value="any">包含任一关键词</option><option value="all">包含全部关键词</option></select></label>
+              <label class="field">排除关键词<input id="rule-exclude" placeholder="例如：销售, 标注"></label>
+              <label class="field">目标城市<input id="rule-cities" placeholder="例如：北京, 上海（留空不限）"></label>
+              <label class="field">部门 / 团队<input id="rule-departments" placeholder="例如：Seed, ACG, Agent（任一匹配）"></label>
+            </div>
+            <fieldset class="subscription-group"><legend>岗位类型 <span>可多选，不选则不限</span></legend><div id="rule-job-types" class="subscription-options"><!-- subscription-job-types --></div></fieldset>
+            <fieldset class="subscription-group"><legend>实习类型 <span>可多选，包含实习 / 全职兼招</span></legend><div id="rule-internship-types" class="subscription-options"><!-- subscription-internship-types --></div></fieldset>
+            <fieldset class="subscription-group"><legend>岗位最低学历 <span>按岗位写明的最低要求筛选，可多选</span></legend><div id="rule-degrees" class="subscription-options"><!-- subscription-degrees --></div></fieldset>
+            <div class="subscription-fields">
+              <label class="field">关注技能 / 标签<input id="rule-tags" list="subscription-tag-options" placeholder="例如：Python, RAG, 多模态"></label>
+              <label class="field">技能 / 标签匹配方式<select id="rule-tag-mode"><option value="any">包含任一技能或标签</option><option value="all">包含全部技能或标签</option></select></label>
+              <label class="field">排除技能 / 标签<input id="rule-exclude-tags" list="subscription-tag-options" placeholder="例如：销售, 已投递"></label>
+              <label class="field">每周我最多可到岗<select id="rule-days"><option value="0">不限天数</option><option value="1">1 天</option><option value="2">2 天</option><option value="3">3 天</option><option value="4">4 天</option><option value="5">5 天</option><option value="6">6 天</option><option value="7">7 天</option></select></label>
+              <label class="field">我可持续实习（月）<input id="rule-months" type="number" min="0" max="60" step="0.5" placeholder="0 表示不限"></label>
+              <label class="field">学历 / 到岗条件未说明时<select id="rule-unknown-policy"><option value="include">保留未说明的岗位，避免漏掉机会</option><option value="exclude">排除未说明的岗位，严格匹配</option></select></label>
+            </div><datalist id="subscription-tag-options"></datalist>
+            <fieldset class="subscription-group"><legend>订阅公司 <span>不选则不限；公司须同时处于监控范围内</span></legend><div id="rule-companies" class="checkbox-grid"></div></fieldset>
+            <p class="hint">文本支持逗号分隔。同一组多选满足任一，不同组条件须同时满足；技能和标签包含 AI 技能、AI 标签和自定义标签。规则影响“仅看订阅匹配”与微信推送，不限制岗位收录。</p>
+            <p class="hint">岗位类型、部门、学历、技能标签与到岗筛选会等待 AI 解析完成后核对，不会因未解析而丢弃动态。关闭解析或达到每日预算时，相关动态继续等待；无需额外的 AI 匹配调用。</p>
+            <div class="subscription-preview-actions"><button id="preview-subscription" class="secondary" type="button">预览匹配岗位</button><span>预览使用当前未保存的条件，不发送通知。</span></div>
+            <div id="subscription-preview" class="subscription-preview" aria-live="polite" hidden></div>
+          </section>
+          <section class="panel full"><div class="panel-heading"><span class="step">03</span><div><h2>把机会推送到微信</h2><p>密钥仅保存在本机，读取设置时不会返回密钥。</p></div></div><div class="notification-grid"><div><label class="check large"><input id="notify-enabled" type="checkbox">启用微信推送</label><label class="field">接收方式<select id="notify-provider"><option value="serverchan">个人微信 · Server酱 Turbo</option><option value="wecom">企业微信 · 群机器人</option></select></label><div id="serverchan-fields"><label class="field">Server酱 SendKey<input id="sendkey" type="password" autocomplete="new-password" placeholder="SCT 开头，留空保留已有密钥"></label><p class="hint"><a href="https://sct.ftqq.com/sendkey/" target="_blank" rel="noopener noreferrer">到 Server酱获取 SendKey ↗</a>，按服务页面绑定微信接收通道。服务额度以其控制台为准。</p></div><div id="wecom-fields" hidden><label class="field">企业微信 Webhook<input id="webhook" type="password" autocomplete="new-password" placeholder="https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=..."></label><p class="hint">在企业微信群中添加机器人，复制官方 Webhook 地址。</p></div><span id="secret-status" class="hint"></span><button id="clear-secret" class="text-button" type="button">清除当前渠道密钥</button></div><div><label class="field">合并推送间隔（分钟）<input id="cooldown" type="number" min="1" max="1440" required></label><label class="field">每天最多尝试推送次数<input id="daily-limit" type="number" min="1" max="100" required></label><label class="check"><input id="notify-updates" type="checkbox">岗位内容更新时也通知</label><p class="hint">设为 1 分钟可在采集完成后尽快发送。默认 60 分钟合并，每天最多 4 次；超出本批容量的动态留到下一批。失败也计入每日上限，避免反复请求。</p><button id="test-push" class="secondary" type="button">发送测试消息到微信 ↗</button><p class="hint">先保存设置，再测试。测试会发送真实消息并消耗服务额度。</p></div></div></section>
+          <section class="panel full ai-settings-panel"><div class="panel-heading"><span class="step">04</span><div><h2>AI 服务与预算</h2><p>使用你自己的 API 和模型，岗位采集不需要 AI 密钥。</p></div></div><div class="notification-grid"><div>
+            <label class="field">AI 服务商<select id="ai-provider"><option value="openrouter">OpenRouter · 多模型平台</option><option value="deepseek">DeepSeek · 官方 API</option></select></label>
+            <div id="openrouter-key-fields"><label class="field">OpenRouter API Key<input id="openrouter-api-key" type="password" autocomplete="new-password" spellcheck="false" placeholder="填写自己的 API Key；留空保留已有密钥"></label><p class="hint"><a href="https://openrouter.ai/settings/keys" target="_blank" rel="noopener noreferrer">获取 OpenRouter API Key ↗</a></p></div>
+            <div id="deepseek-key-fields" hidden><label class="field">DeepSeek API Key<input id="deepseek-api-key" type="password" autocomplete="new-password" spellcheck="false" placeholder="填写自己的 API Key；留空保留已有密钥"></label><p class="hint"><a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener noreferrer">获取 DeepSeek 官方 API Key ↗</a></p></div>
+            <p id="ai-secret-status" class="connection-note" role="status">正在读取配置</p><button id="clear-ai-secret" class="text-button" type="button">清除当前服务商密钥</button>
+            <p class="hint">密钥只保存在这台电脑，读取设置时不会返回密钥。留空保留，输入新值替换，清除操作在保存后生效。切换服务商会保留另一家的密钥。</p>
+            <label class="check large"><input id="ai-enabled" type="checkbox">自动解析新增岗位与现有记录</label><p class="hint">关闭自动解析后仍可主动使用提示词匹配；未配置密钥时也能采集、筛选和收藏岗位。</p>
+          </div><div>
+            <label class="field">模型 ID<input id="ai-model" required maxlength="200" spellcheck="false" placeholder="例如 deepseek-flash"></label>
+            <div class="model-catalog-row"><label class="field">可用模型<select id="ai-model-catalog" aria-label="从服务商模型列表选择"><option value="">可手动填写模型 ID</option></select></label><button id="load-ai-models" class="secondary" type="button">获取模型列表</button></div><p id="ai-model-note" class="hint" role="status">先保存密钥，再获取列表；获取列表不会生成内容。</p>
+            <details class="ai-price-options"><summary>自定义模型计费（可选）</summary><p class="hint">通常自动读取计费。无法识别的模型需同时填写输入、输出单价，单位为美元 / 百万 tokens；价格用于预算控制。</p><div class="ai-price-grid"><label class="field">输入单价<input id="ai-input-price" type="number" min="0" step="any" placeholder="自动"></label><label class="field">输出单价<input id="ai-output-price" type="number" min="0" step="any" placeholder="自动"></label></div></details>
+            <label class="field">每天 AI 预算（美元）<input id="ai-budget" type="number" min="0" max="100" step="0.1" required></label><div class="ai-cost-row"><span>今天的调用费用</span><strong id="ai-cost">—</strong></div><p id="openrouter-config" class="connection-note">正在检查 AI 配置</p><p class="hint">解析与匹配共用预算。达到预算后保留队列，下一天继续；已经解析且内容没变化的岗位复用缓存。</p><button id="retry-ai" type="button" class="secondary">重试失败的解析</button><p id="ai-error" class="hint"></p>
+          </div></div></section>
+          <div class="settings-actions"><span id="settings-message" role="status">正在读取已保存的设置…</span><button id="retry-settings" class="secondary" type="button" hidden>重试加载设置</button><button class="primary" id="save-settings" type="submit" disabled>保存监控与订阅设置</button></div>
+        </form>
+        <section class="panel delivery-panel"><h2>最近推送记录</h2><div id="delivery-list" class="delivery-list"></div></section>
+      </section>
+      <footer>HIREWATCH <span>官方岗位 · 本地记录 · 更早发现机会</span><span>所有时间为北京时间 UTC+8</span></footer>
+    </div>
+  </main>
+  <dialog id="detail-dialog"><div class="dialog-top"><span class="eyebrow">OPPORTUNITY DETAILS</span><button id="close-detail" class="icon-button" aria-label="关闭岗位详情">✕</button></div><div id="detail-content"></div></dialog>
+  <dialog id="tutorial-dialog" aria-labelledby="tutorial-title"><div class="tutorial-top"><a class="tutorial-brand" href="/" tabindex="-1">◉ 招聘雷达</a><button id="tutorial-skip" class="text-button" type="button">暂时跳过</button></div><div id="tutorial-body"></div><div class="tutorial-footer"><span id="tutorial-position" aria-live="polite"></span><div><button id="tutorial-prev" class="secondary" type="button">上一步</button><button id="tutorial-next" class="primary" type="button">开始了解 →</button></div></div></dialog>
+  <div id="toast" class="toast" role="status" hidden></div>
+</body>
+</html>
