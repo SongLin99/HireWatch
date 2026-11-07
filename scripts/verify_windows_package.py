@@ -1,4 +1,5 @@
 """Exercise the actual unpacked EXE using fresh data, without model/source calls."""
+import hashlib
 import json
 import os
 import subprocess
@@ -54,7 +55,7 @@ def main():
                     page.on('pageerror',lambda error:errors.append(str(error)))
                     page.goto(base,wait_until='networkidle')
                     expect(page.locator('#tutorial-dialog')).to_be_visible()
-                    out=ROOT/'data/screenshots/packaged-first-run.png';out.parent.mkdir(exist_ok=True)
+                    out=ROOT/'build/verification/packaged-first-run.png';out.parent.mkdir(parents=True,exist_ok=True)
                     page.screenshot(path=str(out),full_page=False)
                     for _ in range(2):page.locator('#tutorial-next').click()
                     page.locator('[data-tutorial-settings="ai"]').click()
@@ -79,12 +80,17 @@ def main():
         tray_command=[str(exe),'--data-dir',str(data),'--port','8794','--no-browser','--no-scheduler']
         tray_process=subprocess.Popen(tray_command,env=env,cwd=root,creationflags=flags)
         try:
-            for _ in range(100):
+            for _ in range(300):
                 if tray_process.poll() is not None:raise AssertionError('Tray process exited unexpectedly')
                 try:
-                    current=session.get(base+'/api/health',timeout=.2).json()
-                    if current.get('app')=='hirewatch':break
-                except requests.RequestException:pass
+                    state=json.loads((data/'desktop-runtime.json').read_text(encoding='utf-8'))
+                    candidate=f"http://127.0.0.1:{state['port']}"
+                    current=session.get(candidate+'/api/health',timeout=.2).json()
+                    if (current.get('app')=='hirewatch' and current.get('instance')==health['instance']
+                            and current.get('process_id')!=health['process_id']):
+                        base=candidate
+                        break
+                except (requests.RequestException,OSError,ValueError,KeyError):pass
                 time.sleep(.1)
             else:raise AssertionError('Tray launcher did not start service')
             time.sleep(.5);assert tray_process.poll() is None
@@ -95,10 +101,13 @@ def main():
             if tray_process.poll() is None:tray_process.terminate()
             tray_process.wait(timeout=10)
             time.sleep(.3)
-        print(json.dumps({'result':'passed','unpacked_exe_runs_without_python':True,'bundled_browser_driver_runs':True,
+        report={'result':'passed','archive':archive.name,'archive_sha256':hashlib.sha256(archive.read_bytes()).hexdigest(),
+                          'unpacked_exe_runs_without_python':True,'bundled_browser_driver_runs':True,
                           'fresh_credentials_empty':True,'fresh_jobs_favorites_matches_empty':True,
                           'double_launch_reuses_service':True,'owned_service_stops':True,'first_run_tutorial_visible':True,
-                          'native_tray_loop_runs':True,'no_model_calls':True}))
+                          'native_tray_loop_runs':True,'no_model_calls':True}
+        (ROOT/'release/windows-smoke-x64.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        print(json.dumps(report))
 
 
 if __name__=='__main__':main()

@@ -29,3 +29,4 @@ jobs:
           path: |
             release/HireWatch-*-Windows-x64.zip
             release/HireWatch-*-Windows-x64.sha256.txt
+            release/windows-smoke-x64.json
