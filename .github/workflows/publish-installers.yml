@@ -1,0 +1,80 @@
+name: Publish verified installers (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      windows_run:
+        description: Successful Windows build run ID
+        required: true
+        type: string
+      mac_run:
+        description: Successful macOS build run ID
+        required: true
+        type: string
+      release_tag:
+        description: Existing draft release tag
+        default: v1.0.1
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ github.token }}
+      WINDOWS_RUN: ${{ inputs.windows_run }}
+      MAC_RUN: ${{ inputs.mac_run }}
+      RELEASE_TAG: ${{ inputs.release_tag }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require successful builds from this repository's main branch
+        shell: python
+        run: |
+          import json, os, re, subprocess
+          assert re.fullmatch(r'v\d+\.\d+\.\d+', os.environ['RELEASE_TAG'])
+          for key, name in [('WINDOWS_RUN','Build Windows app (manual)'),('MAC_RUN','Build macOS apps (manual)')]:
+              value=os.environ[key]
+              assert value.isdigit()
+              data=json.loads(subprocess.check_output(['gh','run','view',value,'--repo',os.environ['GITHUB_REPOSITORY'],'--json','conclusion,event,headBranch,workflowName']))
+              assert data==dict(conclusion='success',event='workflow_dispatch',headBranch='main',workflowName=name), data
+          release=json.loads(subprocess.check_output(['gh','release','view',os.environ['RELEASE_TAG'],'--repo',os.environ['GITHUB_REPOSITORY'],'--json','isDraft']))
+          assert release['isDraft']
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.windows_run }}
+          name: HireWatch-Windows-x64
+          path: release-incoming
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.mac_run }}
+          pattern: HireWatch-macOS-*
+          merge-multiple: true
+          path: release-incoming
+      - name: Verify every binary checksum and native smoke report
+        shell: python
+        run: |
+          import hashlib, json
+          from pathlib import Path
+          folder=Path('release-incoming')
+          files=list(folder.iterdir())
+          assert len(files)==18 and all(p.is_file() for p in files)
+          binaries=[p for p in files if p.suffix in {'.zip','.exe','.dmg'}]
+          reports=[json.loads(p.read_text()) for p in files if p.suffix=='.json']
+          assert len(binaries)==6 and len(reports)==6
+          for report in reports:
+              assert report['result']=='passed' and report['no_model_calls']
+          for path in binaries:
+              digest=hashlib.sha256(path.read_bytes()).hexdigest()
+              checksum=Path(str(path)+'.sha256.txt') if path.suffix=='.dmg' else path.with_suffix('.sha256.txt')
+              assert digest==checksum.read_text().split()[0]
+              assert any(r.get('archive',r.get('installer',r.get('dmg')))==path.name and r.get('archive_sha256',r.get('sha256'))==digest for r in reports)
+          print('All 6 application files match checksums and passed native smoke reports.')
+      - name: Attach verified packages to draft release
+        run: gh release upload "$RELEASE_TAG" release-incoming/* --clobber --repo "$GITHUB_REPOSITORY"
