@@ -12,7 +12,7 @@
 
 **[下载 Windows / Mac 桌面应用](https://github.com/SongLin99/HireWatch/releases/latest)** · **[三步上手](docs/快速上手.md)** · **[宣传图片](docs/images)**
 
-桌面应用 ZIP 自带运行环境；下面的“开始使用”介绍源码方式，首次需要安装 Python。
+普通用户下载 EXE 安装程序或 Mac DMG 即可使用；运行环境和采集浏览器已内置。
 
 **不填写任何 Key 也能使用：采集岗位、关键词搜索、官网字段筛选、收藏和查看详情都不依赖付费模型。** AI 整理出的岗位类型、技能等高级字段需要先完成解析；微信推送另需自己的推送服务凭据。
 
@@ -34,35 +34,29 @@
 - **可选微信提醒**：支持 Server酱和企业微信群机器人；按订阅条件推送新增与更新。
 - **本地保存**：SQLite 存储岗位、收藏和设置，默认仅监听 `127.0.0.1`。
 
-## 开始使用
+## 开始使用：下载后直接安装
 
-推荐 **Python 3.12**。源码运行要求 Python 3.10+；Windows 推荐 Windows 10/11 64 位，Mac 的内置采集浏览器要求 macOS 14+。
+**不需要安装 Python、Node.js 或采集浏览器，也不需要先填写 API Key。**
 
-1. 点击本页 **Code → Download ZIP**，解压到一个普通文件夹；或者克隆仓库：
+| 你的电脑 | 推荐下载 | 怎么安装 |
+| --- | --- | --- |
+| Windows 10/11，64 位 | [Windows 安装程序](https://github.com/SongLin99/HireWatch/releases/download/v1.0.1/HireWatch-1.0.1-Windows-x64-Setup.exe) | 双击安装 → 完成，桌面和开始菜单自动出现“招聘雷达” |
+| Mac，M 系列芯片 | [Apple 芯片 DMG](https://github.com/SongLin99/HireWatch/releases/download/v1.0.1/HireWatch-1.0.1-macOS-AppleSilicon.dmg) | 打开 DMG → 把招聘雷达拖到 Applications → 从“应用程序”打开 |
+| Mac，Intel 芯片 | [Intel DMG](https://github.com/SongLin99/HireWatch/releases/download/v1.0.1/HireWatch-1.0.1-macOS-Intel.dmg) | 同上 |
 
-   ```text
-   git clone https://github.com/SongLin99/HireWatch.git
-   cd HireWatch
-   ```
+不知道 Mac 芯片？点击左上角苹果菜单 → 关于本机；显示 M 系列选 Apple 芯片，显示 Intel 选 Intel。Mac 要求 macOS 14+。
 
-2. 从 [Python 官网](https://www.python.org/downloads/) 安装适合系统的 Python 3.12。Windows 安装时勾选 **Add python.exe to PATH**。
-3. 运行对应入口：
+安装包内置运行环境和采集浏览器，因此体积比源码 ZIP 大。Windows 默认安装到当前用户，不要求管理员权限；也保留便携 ZIP 供需要的人使用。
 
-   | 系统 | 启动方式 |
-   | --- | --- |
-   | Windows | 双击 `start.cmd` |
-   | macOS | 双击 `start.command`；如果 ZIP 解压后缺少执行权限，在终端进入文件夹运行 `bash start.command` |
-   | 通用终端方式 | Windows：`py -3 launcher.py`；Mac：`python3 launcher.py` |
+1. **打开应用**：安装完成后打开“招聘雷达”，自动进入看板，并显示可跳过的首次教程。
+2. **查看岗位**：选择来源，等待首次采集，按城市、公司和关键词筛选，点击星标收藏。首次检查可能需要几分钟。
+3. **按需增强**：想用 AI 或微信提醒时，再到“设置与推送”连接自己的服务；可以一直跳过。
 
-首次启动自动建立 `.venv`、安装依赖和采集浏览器，需要联网。之后通常直接复用环境。浏览器会打开本机看板，首次使用自带教程，可跳过，也可从左侧“使用教程”重看。
+关闭网页不会停止后台监控。请从 Windows 托盘 / Mac 菜单栏选择“退出招聘雷达（停止监控）”。电脑休眠、关机或断网时不能持续检查。
 
-默认地址是 **http://127.0.0.1:8765**；如果端口被占用，桌面入口会选择附近可用端口并自动打开。启动多个实例会核对同一数据目录，避免重复运行。
+应用尚未购买商业代码签名，Mac 也尚未完成 Apple 公证。首次打开可能出现未知开发者提示，请确认来源后按系统提示处理；不要关闭系统安全保护。
 
-4. 在“设置与推送”选择来源和检查间隔，查看“监控来源”的采集进度，再到看板筛选与收藏。首次扫描可能需要几分钟。
-
-关闭网页不会停止后台监控。请从 Windows 托盘 / Mac 菜单栏选择“退出招聘雷达（停止监控）”。电脑休眠、关机、断网或程序退出时不能持续检查。
-
-更详细的三步教程与常见问题见 **[快速上手](docs/快速上手.md)**。
+详细步骤见 [三步上手](docs/快速上手.md)。需要修改代码的开发者见 [源码运行](docs/源码运行.md)，普通用户不必执行其中的环境安装命令。
 
 ## AI 配置：完全可选
 
@@ -113,7 +107,7 @@ AI 匹配描述示例：
 
 ## 自己打包 EXE / Mac App
 
-源码版与打包版是两种交付形式。上面的源码 ZIP 需要 Python；原生应用包包含运行环境。可从本仓库 Actions 手动构建，或按 [构建说明](docs/构建说明.md) 在对应系统生成。
+源码版与安装版是两种交付形式。[源码运行](docs/源码运行.md)需要 Python；原生安装包包含运行环境和采集浏览器。可从本仓库 Actions 手动构建，或按 [构建说明](docs/构建说明.md) 在对应系统生成。
 
 - Windows 生成便携 EXE 文件夹及 ZIP，不能只单独复制 EXE。
 - Mac 分别生成 Apple Silicon 与 Intel 应用 ZIP，内置采集浏览器；需在 macOS 上构建。

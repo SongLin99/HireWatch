@@ -18,7 +18,7 @@ from build_windows import audit_distribution
 
 
 def main():
-    archive=ROOT/'release/HireWatch-1.0.0-Windows-x64.zip'
+    archive=ROOT/'release/HireWatch-1.0.1-Windows-x64.zip'
     env=os.environ.copy()
     for key in ('OPENROUTER_API_KEY','DEEPSEEK_API_KEY','HIREWATCH_DB','HIREWATCH_DATA_DIR','HIREWATCH_DETAIL_CACHE'):
         env.pop(key,None)
@@ -26,6 +26,8 @@ def main():
         root=Path(temporary);appdir=root/'unpacked';appdir.mkdir()
         with zipfile.ZipFile(archive) as packaged:packaged.extractall(appdir)
         folder=appdir/'招聘雷达';exe=folder/'招聘雷达.exe';data=root/'clean-user-data'
+        env['PLAYWRIGHT_BROWSERS_PATH']=str(folder/'_internal/browser-runtime')
+        os.environ['PLAYWRIGHT_BROWSERS_PATH']=env['PLAYWRIGHT_BROWSERS_PATH']
         audit_distribution(folder)
         flags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0
         result=subprocess.run([str(exe),'--self-check','--no-browser','--data-dir',str(data)],env=env,cwd=root,timeout=60,creationflags=flags)
@@ -49,7 +51,7 @@ def main():
             assert not status['engine']['running'] and status['stats']['saved']==0
             assert 'tutorial-dialog' in session.get(base+'/',timeout=10).text
             with sync_playwright() as automation:
-                browser=automation.chromium.launch(channel='msedge',headless=True)
+                browser=automation.chromium.launch(headless=True)
                 try:
                     page=browser.new_page(viewport={'width':1440,'height':1000});errors=[]
                     page.on('pageerror',lambda error:errors.append(str(error)))

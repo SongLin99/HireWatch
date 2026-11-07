@@ -43,6 +43,8 @@ jobs:
         run: python scripts/build_macos.py --arch ${{ matrix.architecture }}
       - name: Verify unpacked app with empty credentials and no scheduler
         run: python scripts/verify_macos_package.py --arch ${{ matrix.architecture }}
+      - name: Build and verify drag-to-Applications installer
+        run: python scripts/build_macos_dmg.py --arch ${{ matrix.architecture }}
       - uses: actions/upload-artifact@v4
         with:
           name: HireWatch-macOS-${{ matrix.label }}
@@ -53,3 +55,6 @@ jobs:
             release/HireWatch-*-macOS-${{ matrix.label }}.zip
             release/HireWatch-*-macOS-${{ matrix.label }}.sha256.txt
             release/macos-smoke-${{ matrix.architecture }}.json
+            release/HireWatch-*-macOS-${{ matrix.label }}.dmg
+            release/HireWatch-*-macOS-${{ matrix.label }}.dmg.sha256.txt
+            release/macos-dmg-smoke-${{ matrix.architecture }}.json

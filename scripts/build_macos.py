@@ -21,7 +21,7 @@ if str(ROOT/'scripts') not in sys.path:
     sys.path.insert(0, str(ROOT/'scripts'))
 from build_windows import audit_distribution
 
-VERSION = '1.0.0'
+VERSION = '1.0.1'
 NAME = '招聘雷达'
 ARCHITECTURES = ('arm64', 'x86_64')
 MINIMUM_MACOS = '14.0'

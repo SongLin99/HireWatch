@@ -21,6 +21,13 @@ jobs:
       - run: python -m pytest -q
       - run: python scripts/build_windows.py
       - run: python scripts/verify_windows_package.py
+      - name: Ensure installer compiler
+        shell: pwsh
+        run: |
+          $compiler = Get-ChildItem 'C:\Program Files*\Inno Setup*\ISCC.exe' -ErrorAction SilentlyContinue
+          if (-not $compiler) { choco install innosetup --yes --no-progress }
+      - run: python scripts/build_windows_installer.py
+      - run: python scripts/verify_windows_installer.py
       - uses: actions/upload-artifact@v4
         with:
           name: HireWatch-Windows-x64
@@ -30,3 +37,6 @@ jobs:
             release/HireWatch-*-Windows-x64.zip
             release/HireWatch-*-Windows-x64.sha256.txt
             release/windows-smoke-x64.json
+            release/HireWatch-*-Windows-x64-Setup.exe
+            release/HireWatch-*-Windows-x64-Setup.sha256.txt
+            release/windows-installer-smoke.json

@@ -6,6 +6,7 @@ No project root directory, database, logs or credential files are ever collected
 import hashlib
 import importlib.metadata
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -13,7 +14,7 @@ import zipfile
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parent.parent
-VERSION='1.0.0'
+VERSION='1.0.1'
 NAME='招聘雷达'
 FORBIDDEN_NAMES={'openrouter','openrouter.txt','.env','hirewatch.sqlite3','moka_details.sqlite3','server.pid','desktop-runtime.json'}
 
@@ -36,7 +37,7 @@ def main():
     if sys.platform!='win32':raise SystemExit('Build this Windows distribution on Windows.')
     build=ROOT/'build/windows';dist=ROOT/'dist';build.mkdir(parents=True,exist_ok=True)
     version_file=build/'version-info.txt'
-    version_file.write_text("""VSVersionInfo(ffi=FixedFileInfo(filevers=(1,0,0,0),prodvers=(1,0,0,0),mask=0x3f,flags=0,OS=0x40004,fileType=1,subtype=0,date=(0,0)),kids=[StringFileInfo([StringTable('080404b0',[StringStruct('CompanyName','HireWatch'),StringStruct('FileDescription','招聘雷达 · 官方实习机会'),StringStruct('FileVersion','1.0.0'),StringStruct('InternalName','HireWatch'),StringStruct('OriginalFilename','招聘雷达.exe'),StringStruct('ProductName','招聘雷达 HireWatch'),StringStruct('ProductVersion','1.0.0')])]),VarFileInfo([VarStruct('Translation',[2052,1200])])])""",encoding='utf-8')
+    version_file.write_text("""VSVersionInfo(ffi=FixedFileInfo(filevers=(1,0,1,0),prodvers=(1,0,1,0),mask=0x3f,flags=0,OS=0x40004,fileType=1,subtype=0,date=(0,0)),kids=[StringFileInfo([StringTable('080404b0',[StringStruct('CompanyName','HireWatch'),StringStruct('FileDescription','招聘雷达 · 官方实习机会'),StringStruct('FileVersion','1.0.1'),StringStruct('InternalName','HireWatch'),StringStruct('OriginalFilename','招聘雷达.exe'),StringStruct('ProductName','招聘雷达 HireWatch'),StringStruct('ProductVersion','1.0.1')])]),VarFileInfo([VarStruct('Translation',[2052,1200])])])""",encoding='utf-8')
     args=[sys.executable,'-m','PyInstaller','--noconfirm','--clean','--onedir','--windowed','--noupx',
           '--name',NAME,'--distpath',str(dist),'--workpath',str(build/'work'),'--specpath',str(build),
           '--icon',str(ROOT/'assets/hirewatch.ico'),'--add-data',str(ROOT/'web')+';web',
@@ -44,9 +45,19 @@ def main():
           '--add-data',str(ROOT/'assets/hirewatch.ico')+';assets',
           '--collect-all','playwright','--collect-submodules','uvicorn','--collect-submodules','pystray',
           '--exclude-module','tkinter','--exclude-module','pytest','--exclude-module','httpx',str(ROOT/'desktop.pyw')]
-    subprocess.run(args,cwd=ROOT,check=True)
+    env=os.environ.copy()
+    browser_download=build/'browser-download'
+    env['PLAYWRIGHT_BROWSERS_PATH']=str(browser_download.resolve())
+    subprocess.run([sys.executable,'-m','playwright','install','--only-shell','chromium'],cwd=ROOT,env=env,check=True)
+    subprocess.run(args,cwd=ROOT,env=env,check=True)
     target=dist/NAME
-    text='''招聘雷达 Windows 免安装版 1.0.0
+    runtime=target/'_internal/browser-runtime'
+    for package in browser_download.iterdir():
+        if package.is_dir() and package.name.startswith(('chromium_headless_shell-','ffmpeg-')):
+            shutil.copytree(package,runtime/package.name,dirs_exist_ok=True)
+    if not any(runtime.glob('chromium_headless_shell-*')):
+        raise RuntimeError('Bundled Windows Chromium is missing')
+    text='''招聘雷达 Windows 免安装版 1.0.1
 
 使用方法
 1. 将整个“招聘雷达”文件夹解压到电脑中的任意位置。
@@ -56,7 +67,7 @@ def main():
 5. 如需微信推送，填写自己的 Server酱 SendKey 或企业微信机器人地址，再启用推送。
 6. 右键托盘图标 → “退出招聘雷达（停止监控）”可以退出后台。
 
-不需要安装 Python。部分官网采集需要已安装的 Microsoft Edge 或 Google Chrome。
+不需要安装 Python、Node.js 或采集浏览器，运行环境与 Chromium 采集浏览器均已内置。
 浏览器看板地址只监听本机。关闭浏览器不会停止监控；退出托盘程序或关机会停止。
 第一次采集多个官网可能需要几分钟；无需等待 AI 解析完成就可以搜索、收藏和查看官网。
 AI 解析/匹配需要你自己的模型服务账户，按服务商计费，预算可在设置中调整；不填 Key 可先使用采集、筛选和收藏。

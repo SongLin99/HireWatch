@@ -192,7 +192,7 @@ def tencent():
 
 def browser_instance(playwright):
     preferred = os.getenv("HIREWATCH_BROWSER", "msedge")
-    channels=[None,preferred,'chrome'] if getattr(sys,'frozen',False) and sys.platform=='darwin' else [preferred,'chrome',None]
+    channels=[None,preferred,'chrome'] if getattr(sys,'frozen',False) and sys.platform in {'darwin','win32'} else [preferred,'chrome',None]
     for channel in dict.fromkeys(channels):
         try:
             return playwright.chromium.launch(channel=channel, headless=True)

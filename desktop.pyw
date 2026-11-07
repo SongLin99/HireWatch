@@ -139,11 +139,13 @@ def open_data_directory(directory):
 
 
 def configure_browser_environment():
-    if getattr(sys,'frozen',False) and sys.platform=='darwin':
+    if getattr(sys,'frozen',False) and sys.platform in {'darwin','win32'}:
         # Chromium is an opaque resource, not a Python binary dependency. This
         # preserves its upstream Mach-O layout and avoids rewriting its dylibs.
         if not os.environ.get('PLAYWRIGHT_BROWSERS_PATH') or os.environ['PLAYWRIGHT_BROWSERS_PATH']=='0':
-            os.environ['PLAYWRIGHT_BROWSERS_PATH']=str(Path(sys.executable).parent.parent/'Resources/browser-runtime')
+            runtime=(Path(sys.executable).parent.parent/'Resources/browser-runtime' if sys.platform=='darwin'
+                     else Path(getattr(sys,'_MEIPASS',Path(sys.executable).parent))/'browser-runtime')
+            os.environ['PLAYWRIGHT_BROWSERS_PATH']=str(runtime)
 
 
 def show_startup_error(message):
@@ -202,14 +204,14 @@ def main():
             assert (RESOURCE_ROOT/'assets/hirewatch.ico').is_file()
             driver=RESOURCE_ROOT/'playwright/driver'/('node.exe' if sys.platform=='win32' else 'node')
             assert driver.is_file() or not getattr(sys,'frozen',False)
-            bundled_mac=getattr(sys,'frozen',False) and sys.platform=='darwin'
-            if bundled_mac:
-                bundled_browsers=Path(sys.executable).parent.parent/'Resources/browser-runtime'
+            bundled_desktop=getattr(sys,'frozen',False) and sys.platform in {'darwin','win32'}
+            if bundled_desktop:
+                bundled_browsers=Path(os.environ['PLAYWRIGHT_BROWSERS_PATH'])
                 assert any(p.is_dir() for p in bundled_browsers.glob('chromium_headless_shell-*')), 'Bundled Chromium headless shell is missing'
                 os.environ['PLAYWRIGHT_BROWSERS_PATH']=str(bundled_browsers)
             with playwright.sync_api.sync_playwright() as automation:
                 from hirewatch.collectors import browser_instance
-                browser=automation.chromium.launch(headless=True) if bundled_mac else browser_instance(automation)
+                browser=automation.chromium.launch(headless=True) if bundled_desktop else browser_instance(automation)
                 try:
                     page=browser.new_page();page.set_content('<h1>HireWatch</h1>')
                     assert page.locator('h1').inner_text()=='HireWatch'

@@ -138,7 +138,7 @@ def test_macos_directory_and_error_ui_use_native_commands(tmp_path,monkeypatch):
     assert calls[1][0]=='/usr/bin/osascript' and calls[1][-1]==message
 
 
-def test_only_frozen_macos_defaults_to_bundled_browser(monkeypatch):
+def test_frozen_desktops_default_to_their_own_bundled_browser(monkeypatch):
     desktop=desktop_module()
     monkeypatch.setattr(desktop.sys,'frozen',True,raising=False)
     monkeypatch.setattr(desktop.sys,'platform','darwin')
@@ -150,6 +150,10 @@ def test_only_frozen_macos_defaults_to_bundled_browser(monkeypatch):
     assert desktop.os.environ['PLAYWRIGHT_BROWSERS_PATH']=='chosen-browser-location'
     monkeypatch.delenv('PLAYWRIGHT_BROWSERS_PATH')
     monkeypatch.setattr(desktop.sys,'platform','win32')
+    desktop.configure_browser_environment()
+    assert desktop.os.environ['PLAYWRIGHT_BROWSERS_PATH']==str(Path(getattr(sys,'_MEIPASS',Path(sys.executable).parent))/'browser-runtime')
+    monkeypatch.delenv('PLAYWRIGHT_BROWSERS_PATH')
+    monkeypatch.setattr(desktop.sys,'frozen',False)
     desktop.configure_browser_environment()
     assert 'PLAYWRIGHT_BROWSERS_PATH' not in desktop.os.environ
 
