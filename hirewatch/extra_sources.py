@@ -14,7 +14,7 @@ from .paths import DATA_DIR
 from .collectors import Result, browser_instance, request_json, label, stamp, checked_page, PAUSE_SECONDS
 
 EXTRA_INFO = {
-    "zhipu":{"name":"智谱", "url":"https://zhipu-ai.jobs.feishu.cn/", "description":"官方招聘页面中标注实习的职位。"},
+    "zhipu":{"name":"智谱", "url":"https://www.zhipuai.cn/zh/joinus", "description":"官网链接的 Moka 校招及社招入口，检查完整正文中的实习机会。"},
     "mihoyo":{"name":"米哈游", "url":"https://jobs.mihoyo.com/#/campus", "description":"官方校园招聘的实习生投递项目。"},
     "minimax":{"name":"MiniMax", "url":"https://vrfi1sk8a0.jobs.feishu.cn/", "description":"官方招聘页中的实习与可实习职位。"},
     "deepseek":{"name":"DeepSeek", "url":"https://talent.deepseek.com/", "description":"官网链接的 Moka 职位库，保留明确可实习的岗位。"},
@@ -55,7 +55,9 @@ def feishu(source,base,paths):
                     except ValueError:return False
                 url=f'{base}/{path}?limit=100' if path.endswith('/position/list') else f'{base}/{path}/?limit=100' if path else f'{base}/?limit=100'
                 with page.expect_response(lambda r:expected(r),timeout=60000) as response:
-                    page.goto(url,wait_until='domcontentloaded',timeout=45000)
+                    navigation=page.goto(url,wait_until='domcontentloaded',timeout=45000)
+                    if navigation and navigation.status>=400:
+                        raise ValueError(f'{EXTRA_INFO[source]["name"]}招聘入口返回 HTTP {navigation.status}，可能已迁移；保留历史数据')
                 detail_path=path.split('/position/')[0] if '/position/' in path else path or 'index'
                 seen=set();offset=0
                 for _ in range(1000):
@@ -114,10 +116,38 @@ def shailab():
 
 
 MOKA_SITES={
+    'zhipu':'https://app.mokahr.com/campus-recruitment/zphz/148984',
     'deepseek':'https://app.mokahr.com/social-recruitment/high-flyer/140576',
     'kimi':'https://app.mokahr.com/apply/moonshot/148506',
     'stepfun':'https://app.mokahr.com/campus-recruitment/step/94905',
 }
+
+# Both destinations are linked by the company's official Join Us page. Some
+# career portals do not link back to their sibling campus/social portal.
+MOKA_EXTRA_SITES={
+    'zhipu':['https://app.mokahr.com/social-recruitment/zphz/148983'],
+}
+
+
+def moka_ready_total(page):
+    """A response event precedes rendering: the initial '0 results' is not data.
+
+    Zero is deliberately inconclusive without a contracted empty-state signal;
+    retain the last successful snapshot rather than mark every job unavailable.
+    """
+    from playwright.sync_api import TimeoutError as BrowserTimeout
+    try:
+        page.wait_for_function(r"""() => {
+            const m = document.body.innerText.match(/(\d+)\s*结果/);
+            return m && Number(m[1]) > 0 &&
+                document.querySelector('a[href*="#/job/"] [class^="card-content-"]');
+        }""",timeout=20000)
+    except BrowserTimeout:
+        raise ValueError('官网岗位列表尚未加载完成或显示零结果，无法确认空列表；保留历史数据，请稍后重试') from None
+    count=re.search(r'(\d+)\s*结果',page.locator('body').inner_text())
+    if not count or int(count.group(1))<=0:
+        raise ValueError('官网岗位总数尚未稳定，保留历史数据')
+    return int(count.group(1))
 
 
 def moka_cards(page):
@@ -180,8 +210,22 @@ def moka_detail(page, card):
     page.get_by_text(card['title'],exact=True).first.wait_for(timeout=25000)
     descriptions=page.locator('[class^="job-description-"]:visible')
     descriptions.first.wait_for(timeout=25000)
+    return moka_detail_text(page,card)
+
+
+def moka_detail_text(page,card):
+    descriptions=page.locator('[class^="job-description-"]:visible')
     text='\n\n'.join(dict.fromkeys(t.strip() for t in descriptions.all_inner_texts() if t.strip()))
-    if not text:raise ValueError('官方岗位详情未完整加载，保留历史数据')
+    if not text:
+        # Some migrated records really have an empty JD. Give rendering a chance
+        # to finish, then require the matching job's populated metadata panel.
+        page.wait_for_timeout(1000)
+        text='\n\n'.join(dict.fromkeys(t.strip() for t in descriptions.all_inner_texts() if t.strip()))
+        if not text:
+            info='\n'.join(page.locator('[class^="info-container-"]:visible').all_inner_texts())
+            if card['title'] not in info or '职位名称' not in info or not re.search(r'职位性质\s+(?:职位性质\s+)?(?:全职|实习|兼职|其他)',info):
+                raise ValueError('官方岗位详情未完整加载，保留历史数据')
+            return clean('官方未填写职位描述；以下为该岗位的公开信息：\n'+info)
     # Only the job description; navigation and related openings are excluded.
     return clean(text)
 
@@ -193,16 +237,14 @@ def moka_listing(page,base):
             if '/website/jobs/v2' not in response.url or response.url.endswith('Aggregations') or response.status!=200:return False
             try:return json.loads(response.request.post_data or '{}').get('offset')==(index-1)*30
             except ValueError:return False
+        # A fresh document prevents the previous page's count/cards satisfying
+        # readiness while the next response is still being rendered.
+        page.goto('about:blank')
         with page.expect_response(expected,timeout=60000):
             page.goto(base+f'#/jobs?page={index}',wait_until='domcontentloaded',timeout=45000)
-        page.get_by_text(re.compile(r'\d+\s*结果')).first.wait_for(timeout=20000)
-        count=re.search(r'(\d+)\s*结果',page.locator('body').inner_text())
-        if not count:raise ValueError('官网未提供可确认的总岗位数')
-        total=int(count.group(1))
+        total=moka_ready_total(page)
         if index==1:
             links=page.locator('a').evaluate_all("""els => els.filter(e => /校招|实习|校园|社招|社会招聘/.test(e.innerText) && /^https:\/\/app\.mokahr\.com\//.test(e.href)).map(e=>e.href)""")
-        if total==0:
-            return [],{'url':base+'#/jobs','reported':0,'checked':0},links
         page.locator('a[href*="#/job/"] [class^="card-content-"]').first.wait_for(timeout=20000)
         page.wait_for_timeout(350)
         chunk=moka_cards(page)
@@ -217,8 +259,8 @@ def moka_listing(page,base):
 
 def moka(source):
     from playwright.sync_api import sync_playwright
-    jobs={};all_cards=[];entries=[];visited=set();queue=[MOKA_SITES[source]]
-    cache=MokaDetailCache();cached=fetched=0
+    jobs={};all_cards=[];entries=[];visited=set();queue=[MOKA_SITES[source],*MOKA_EXTRA_SITES.get(source,[])]
+    cache=MokaDetailCache();cached=fetched=empty_details=0
     with sync_playwright() as p:
         browser=browser_instance(p)
         try:
@@ -247,10 +289,11 @@ def moka(source):
                     fetched+=1
                     time.sleep(PAUSE_SECONDS)
                 else:cached+=1
+                if text.startswith('官方未填写职位描述'):empty_details+=1
                 job=moka_job({**card,'text':text},source)
                 if job:jobs.setdefault(job.id,job)
             unique_ids={re.search(r'#/job/([a-f0-9-]+)',c['url']).group(1) for c in all_cards}
-            return Result(list(jobs.values()),empty_verified=True,coverage={'reported':sum(e['reported'] for e in entries),'checked':sum(e['checked'] for e in entries),'unique_checked':len(unique_ids),'details':fetched+cached,'included':len(jobs),'excluded':len(unique_ids)-len(jobs),'cached_details':cached,'fetched_details':fetched,'scope':'官网互链的校招及社招入口；各岗位完整详情','entries':entries,'complete':True})
+            return Result(list(jobs.values()),empty_verified=True,coverage={'reported':sum(e['reported'] for e in entries),'checked':sum(e['checked'] for e in entries),'unique_checked':len(unique_ids),'details':fetched+cached,'empty_details':empty_details,'included':len(jobs),'excluded':len(unique_ids)-len(jobs),'cached_details':cached,'fetched_details':fetched,'scope':'官方校招及社招入口；正文或官网明确展示的岗位信息','entries':entries,'complete':True})
         finally:browser.close()
 
 
@@ -284,7 +327,7 @@ def mihoyo():
 
 
 EXTRA_COLLECTORS={
-    'zhipu':lambda:feishu('zhipu','https://zhipu-ai.jobs.feishu.cn',['','zhipucampus/position/list']),
+    'zhipu':lambda:moka('zhipu'),
     'minimax':lambda:feishu('minimax','https://vrfi1sk8a0.jobs.feishu.cn',['','379481']),
     'deepseek':lambda:moka('deepseek'),'kimi':lambda:moka('kimi'),'stepfun':lambda:moka('stepfun'),
     'shailab':shailab,'mihoyo':mihoyo,
