@@ -1,7 +1,7 @@
 const $ = id => document.getElementById(id);
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const sourceNames = {baidu:'百度',meituan:'美团',tencent:'腾讯',bytedance:'字节跳动',alibaba:'阿里巴巴',zhipu:'智谱',mihoyo:'米哈游',minimax:'MiniMax',deepseek:'DeepSeek',shailab:'上海 AI Lab',kimi:'月之暗面 Kimi',stepfun:'阶跃星辰'};
-const sourceLetters = {baidu:'百',meituan:'美',tencent:'腾',bytedance:'字',alibaba:'阿',zhipu:'智',mihoyo:'米',minimax:'M',deepseek:'D',shailab:'AI',kimi:'K',stepfun:'阶'};
+const sourceNames = {baidu:'百度',meituan:'美团',tencent:'腾讯',bytedance:'字节跳动',alibaba:'阿里巴巴',zhipu:'智谱',mihoyo:'米哈游',minimax:'MiniMax',deepseek:'DeepSeek',shailab:'上海 AI Lab',kimi:'月之暗面 Kimi',stepfun:'阶跃星辰',baichuan:'百川智能',modelbest:'面壁智能',baai:'北京智源研究院',shengshu:'生数科技'};
+const sourceLetters = {baidu:'百',meituan:'美',tencent:'腾',bytedance:'字',alibaba:'阿',zhipu:'智',mihoyo:'米',minimax:'M',deepseek:'D',shailab:'AI',kimi:'K',stepfun:'阶',baichuan:'川',modelbest:'壁',baai:'源',shengshu:'生'};
 let currentView = 'jobs', company = '', page = 1, total = 0, settings, currentJobs = [], requestId = 0, toastTimer;
 let clearProvider = null;
 const clearAIProviders=new Set(),aiModelsByProvider={openrouter:'deepseek/deepseek-v3.2',deepseek:'deepseek-flash'};

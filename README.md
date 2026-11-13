@@ -26,7 +26,7 @@
 
 </details>
 
-- **聚合官方实习信息**：目前有 12 个来源适配器，支持实习与明确接受实习的全职兼招岗位。
+- **聚合官方实习信息**：目前有 16 个来源适配器，支持实习与明确接受实习的全职兼招岗位。
 - **多条件筛选**：公司、城市、关键词、实习类型、学历、部门、技能标签、每周天数和实习时长等；部分字段由可选 AI 解析获得。
 - **统一收藏**：看板、岗位详情和 AI 匹配结果使用同一份收藏，左侧独立入口集中查看。
 - **可选 AI**：从原文提取结构化字段；输入求职偏好，比较候选岗位，显示匹配理由与待确认条件。
@@ -40,9 +40,9 @@
 
 | 你的电脑 | 推荐下载 | 怎么安装 |
 | --- | --- | --- |
-| Windows 10/11，64 位 | [Windows 安装程序](https://github.com/SongLin99/HireWatch/releases/download/v1.0.1/HireWatch-1.0.1-Windows-x64-Setup.exe) | 双击安装 → 完成，桌面和开始菜单自动出现“招聘雷达” |
-| Mac，M 系列芯片 | [Apple 芯片 DMG](https://github.com/SongLin99/HireWatch/releases/download/v1.0.1/HireWatch-1.0.1-macOS-AppleSilicon.dmg) | 打开 DMG → 把招聘雷达拖到 Applications → 从“应用程序”打开 |
-| Mac，Intel 芯片 | [Intel DMG](https://github.com/SongLin99/HireWatch/releases/download/v1.0.1/HireWatch-1.0.1-macOS-Intel.dmg) | 同上 |
+| Windows 10/11，64 位 | [Windows 安装程序](https://github.com/SongLin99/HireWatch/releases/download/v1.0.2/HireWatch-1.0.2-Windows-x64-Setup.exe) | 双击安装 → 完成，桌面和开始菜单自动出现“招聘雷达” |
+| Mac，M 系列芯片 | [Apple 芯片 DMG](https://github.com/SongLin99/HireWatch/releases/download/v1.0.2/HireWatch-1.0.2-macOS-AppleSilicon.dmg) | 打开 DMG → 把招聘雷达拖到 Applications → 从“应用程序”打开 |
+| Mac，Intel 芯片 | [Intel DMG](https://github.com/SongLin99/HireWatch/releases/download/v1.0.2/HireWatch-1.0.2-macOS-Intel.dmg) | 同上 |
 
 不知道 Mac 芯片？点击左上角苹果菜单 → 关于本机；显示 M 系列选 Apple 芯片，显示 Intel 选 Intel。Mac 要求 macOS 14+。
 
@@ -88,7 +88,7 @@ AI 匹配描述示例：
 
 ## 来源与边界
 
-百度、美团、腾讯、字节跳动、阿里巴巴、智谱、米哈游、MiniMax、DeepSeek、上海 AI Lab、月之暗面 Kimi、阶跃星辰。
+百度、美团、腾讯、字节跳动、阿里巴巴、智谱、米哈游、MiniMax、DeepSeek、上海 AI Lab、月之暗面 Kimi、阶跃星辰、百川智能、面壁智能、北京智源研究院、生数科技。
 
 这是适配器清单，**不是对这些网站当前可用性或全部岗位覆盖的保证**。接口、页面和访问规则会变化；失败会显示在“监控来源”，保留上次成功数据。“最近未见”不代表官网已关闭岗位，是否在招请打开原始链接确认。
 

@@ -18,7 +18,7 @@ from build_windows import audit_distribution
 
 
 def main():
-    archive=ROOT/'release/HireWatch-1.0.1-Windows-x64.zip'
+    archive=ROOT/'release/HireWatch-1.0.2-Windows-x64.zip'
     env=os.environ.copy()
     for key in ('OPENROUTER_API_KEY','DEEPSEEK_API_KEY','HIREWATCH_DB','HIREWATCH_DATA_DIR','HIREWATCH_DETAIL_CACHE'):
         env.pop(key,None)

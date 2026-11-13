@@ -14,7 +14,7 @@ import zipfile
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parent.parent
-VERSION='1.0.1'
+VERSION='1.0.2'
 NAME='招聘雷达'
 FORBIDDEN_NAMES={'openrouter','openrouter.txt','.env','hirewatch.sqlite3','moka_details.sqlite3','server.pid','desktop-runtime.json'}
 
@@ -37,7 +37,7 @@ def main():
     if sys.platform!='win32':raise SystemExit('Build this Windows distribution on Windows.')
     build=ROOT/'build/windows';dist=ROOT/'dist';build.mkdir(parents=True,exist_ok=True)
     version_file=build/'version-info.txt'
-    version_file.write_text("""VSVersionInfo(ffi=FixedFileInfo(filevers=(1,0,1,0),prodvers=(1,0,1,0),mask=0x3f,flags=0,OS=0x40004,fileType=1,subtype=0,date=(0,0)),kids=[StringFileInfo([StringTable('080404b0',[StringStruct('CompanyName','HireWatch'),StringStruct('FileDescription','招聘雷达 · 官方实习机会'),StringStruct('FileVersion','1.0.1'),StringStruct('InternalName','HireWatch'),StringStruct('OriginalFilename','招聘雷达.exe'),StringStruct('ProductName','招聘雷达 HireWatch'),StringStruct('ProductVersion','1.0.1')])]),VarFileInfo([VarStruct('Translation',[2052,1200])])])""",encoding='utf-8')
+    version_file.write_text("""VSVersionInfo(ffi=FixedFileInfo(filevers=(1,0,2,0),prodvers=(1,0,2,0),mask=0x3f,flags=0,OS=0x40004,fileType=1,subtype=0,date=(0,0)),kids=[StringFileInfo([StringTable('080404b0',[StringStruct('CompanyName','HireWatch'),StringStruct('FileDescription','招聘雷达 · 官方实习机会'),StringStruct('FileVersion','1.0.2'),StringStruct('InternalName','HireWatch'),StringStruct('OriginalFilename','招聘雷达.exe'),StringStruct('ProductName','招聘雷达 HireWatch'),StringStruct('ProductVersion','1.0.2')])]),VarFileInfo([VarStruct('Translation',[2052,1200])])])""",encoding='utf-8')
     args=[sys.executable,'-m','PyInstaller','--noconfirm','--clean','--onedir','--windowed','--noupx',
           '--name',NAME,'--distpath',str(dist),'--workpath',str(build/'work'),'--specpath',str(build),
           '--icon',str(ROOT/'assets/hirewatch.ico'),'--add-data',str(ROOT/'web')+';web',
@@ -57,7 +57,7 @@ def main():
             shutil.copytree(package,runtime/package.name,dirs_exist_ok=True)
     if not any(runtime.glob('chromium_headless_shell-*')):
         raise RuntimeError('Bundled Windows Chromium is missing')
-    text='''招聘雷达 Windows 免安装版 1.0.1
+    text='''招聘雷达 Windows 免安装版 1.0.2
 
 使用方法
 1. 将整个“招聘雷达”文件夹解压到电脑中的任意位置。

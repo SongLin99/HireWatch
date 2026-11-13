@@ -112,6 +112,14 @@ class Store:
                 db.execute('UPDATE settings SET value=? WHERE id=1',(json.dumps(settings,ensure_ascii=False),))
                 db.execute("INSERT INTO meta VALUES('v2_sources','1')")
 
+            # Run once on upgrade; later user opt-outs must remain respected.
+            if not db.execute("SELECT 1 FROM meta WHERE key='sources_20261113'").fetchone():
+                settings = json.loads(db.execute('SELECT value FROM settings WHERE id=1').fetchone()[0])
+                settings['enabled_sources'] = list(dict.fromkeys(settings['enabled_sources'] + ['baichuan','modelbest','baai','shengshu']))
+                db.execute('UPDATE settings SET value=? WHERE id=1',(json.dumps(settings,ensure_ascii=False),))
+                db.execute("INSERT INTO meta VALUES('sources_20261113','1')")
+
+
     @contextmanager
     def connection(self):
         db = sqlite3.connect(self.path, timeout=30)

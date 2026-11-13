@@ -14,6 +14,10 @@ from .paths import DATA_DIR
 from .collectors import Result, browser_instance, request_json, label, stamp, checked_page, PAUSE_SECONDS
 
 EXTRA_INFO = {
+    "baichuan":{"name":"百川智能", "url":"https://careers.baichuan-inc.com/", "description":"官方日常实习、校园及社会招聘入口；保留正文明确接受实习的岗位。"},
+    "modelbest":{"name":"面壁智能", "url":"https://modelbest.jobs.feishu.cn/campus", "description":"官方校招与社招完整列表，包含专项及日常实习。"},
+    "baai":{"name":"北京智源研究院", "url":"https://app.mokahr.com/campus-recruitment/baai/42174", "description":"智源官方校招及社招职位库中的研究与其他实习岗位。"},
+    "shengshu":{"name":"生数科技", "url":"https://shengshu.jobs.feishu.cn/", "description":"官方校招与社招完整列表；核查岗位正文中的实习条件。"},
     "zhipu":{"name":"智谱", "url":"https://www.zhipuai.cn/zh/joinus", "description":"官网链接的 Moka 校招及社招入口，检查完整正文中的实习机会。"},
     "mihoyo":{"name":"米哈游", "url":"https://jobs.mihoyo.com/#/campus", "description":"官方校园招聘的实习生投递项目。"},
     "minimax":{"name":"MiniMax", "url":"https://vrfi1sk8a0.jobs.feishu.cn/", "description":"官方招聘页中的实习与可实习职位。"},
@@ -116,6 +120,7 @@ def shailab():
 
 
 MOKA_SITES={
+    'baai':'https://app.mokahr.com/campus-recruitment/baai/42174',
     'zhipu':'https://app.mokahr.com/campus-recruitment/zphz/148984',
     'deepseek':'https://app.mokahr.com/social-recruitment/high-flyer/140576',
     'kimi':'https://app.mokahr.com/apply/moonshot/148506',
@@ -125,6 +130,7 @@ MOKA_SITES={
 # Both destinations are linked by the company's official Join Us page. Some
 # career portals do not link back to their sibling campus/social portal.
 MOKA_EXTRA_SITES={
+    'baai':['https://app.mokahr.com/social-recruitment/baai/42173'],
     'zhipu':['https://app.mokahr.com/social-recruitment/zphz/148983'],
 }
 
@@ -327,6 +333,10 @@ def mihoyo():
 
 
 EXTRA_COLLECTORS={
+    'baichuan':lambda:feishu('baichuan','https://cq6qe6bvfr6.jobs.feishu.cn',['646926','baichuanzhaopin']),
+    'modelbest':lambda:feishu('modelbest','https://modelbest.jobs.feishu.cn',['campus/position/list','career/position/list']),
+    'baai':lambda:moka('baai'),
+    'shengshu':lambda:feishu('shengshu','https://shengshu.jobs.feishu.cn',['index/position/list','692892/position/list']),
     'zhipu':lambda:moka('zhipu'),
     'minimax':lambda:feishu('minimax','https://vrfi1sk8a0.jobs.feishu.cn',['','379481']),
     'deepseek':lambda:moka('deepseek'),'kimi':lambda:moka('kimi'),'stepfun':lambda:moka('stepfun'),

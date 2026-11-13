@@ -6,7 +6,7 @@ import zipfile
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parent.parent
-KIT_NAME='HireWatch-1.0.1-macOS-Build-Kit'
+KIT_NAME='HireWatch-1.0.2-macOS-Build-Kit'
 FIXED_FILES=(
     'LICENSE','desktop.pyw','requirements.txt','requirements-dev.txt','requirements-build.txt',
     'requirements-build-macos.txt','build_macos.command','Mac构建说明.md','README.md',
@@ -64,7 +64,7 @@ def main():
     files=kit_files();audit_kit_files(files)
     release=ROOT/'release';release.mkdir(exist_ok=True)
     archive=release/(KIT_NAME+'.zip')
-    manifest={'application':'HireWatch','version':'1.0.1','kind':'macOS-source-build-kit',
+    manifest={'application':'HireWatch','version':'1.0.2','kind':'macOS-source-build-kit',
               'contains_native_app':False,'native_macos_build_required':True,
               'personal_data_included':False,'credentials_included':False,
               'files':[{'path':p.relative_to(ROOT).as_posix(),'sha256':hashlib.sha256(source_payload(p)).hexdigest(),'bytes':len(source_payload(p))} for p in files]}
